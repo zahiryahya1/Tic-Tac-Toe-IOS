@@ -10,16 +10,20 @@ import UIKit
 
 class ViewController: UIViewController {
 
+	@IBOutlet weak var label: UILabel!
+	
 	var activePlayer = 1; // cross 'X'
+	var gameIsActive = true;
+	var numMoves = 0;
 	var grid = [0, 0, 0,
 				0, 0, 0,
 				0, 0, 0];
 
 	
 	@IBAction func Action(_ sender: AnyObject) {
-		
+
 		// if the cell is 0, we can make a move on it
-		if (grid[sender.tag-1] == 0) {
+		if (grid[sender.tag-1] == 0 && gameIsActive == true) {
 			// player 1
 			if ( activePlayer == 1) {
 				// displays img
@@ -27,10 +31,22 @@ class ViewController: UIViewController {
 				grid[sender.tag-1] = 1;
 				
 				if (isWin(player: activePlayer)) {
-					print("Player one wins\n");
+					gameIsActive = false;
+					playAgainButton.isHidden = false;
+					label.text = "Player 'X' Wins!";
+					label.isHidden = false;
 				}
 				
+				numMoves+=1;
 				activePlayer = 2; // set player to player 2
+				
+				// check for tie game
+				if (isTie()) {
+					label.text = "ISSA TIE!";
+					label.isHidden = false;
+					playAgainButton.isHidden = false;
+					gameIsActive = false;
+				}
 			}
 				// player 2
 			else {
@@ -39,13 +55,33 @@ class ViewController: UIViewController {
 				grid[sender.tag-1] = 2;
 				
 				if (isWin(player: activePlayer)) {
-					print("Player 2 wins\n");
+					gameIsActive = false;
+					playAgainButton.isHidden = false;
+					label.text = "Player 'O' Wins!";
+					label.isHidden = false;
 				}
 				
+				numMoves+=1;
 				activePlayer = 1; // set player to player 1
+				
+				// check for tie game
+				if (isTie()) {
+					label.text = "ISSA TIE!";
+					label.isHidden = false;
+					gameIsActive = false;
+					playAgainButton.isHidden = false;
+				}
 			}
 		}
 	}
+	
+	
+	
+	@IBOutlet weak var playAgainButton: UIButton!
+	@IBAction func playAgain(_ sender: Any) {
+		reset();
+	}
+	
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		// Do any additional setup after loading the view, typically from a nib.
@@ -96,6 +132,45 @@ class ViewController: UIViewController {
 			return false;
 		}
 	}
+	
+	// if 9 moves are played, the board is full
+	func isTie() -> Bool {
+		
+		if ( numMoves >= 9) {
+			return true;
+		}
+		
+		return false;
+	}
+
+	// resets the game
+	func reset() {
+		// set grid to 0.
+		grid = [0, 0, 0,
+				0, 0, 0,
+				0, 0, 0]
+		
+		numMoves = 0;
+		gameIsActive = true;
+		activePlayer = 1;
+		
+		// hide images
+		for i in 1...grid.count {
+			let button = view.viewWithTag(i) as! UIButton;
+			button.setImage(nil, for: UIControlState());
+		}
+		
+		label.isHidden = true;
+		playAgainButton.isHidden = true;
+
+	}
+	
+	/* notes:
+		add a menu view
+		when game ends, display a transparent view
+			with the winner and the users total win scores.
+			with a button to play again / rematch. or start new game session
+	*/
 
 
 }
